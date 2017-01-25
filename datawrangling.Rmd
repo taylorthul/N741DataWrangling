@@ -1,6 +1,6 @@
 ---
 title: 'Data Wrangling: January 25, 2017'
-author: "Melinda Higgins"
+author: "Taylor Thul"
 date: "January 25, 2017"
 output:
   html_document: default
@@ -16,7 +16,7 @@ In today's class we will cover the various data (or "object") structures in `R`.
 * scalar (which are really vectors of length 1)
 * vector
 * matrices (and "arrays")
-* data frame
+* data frame: this is very important! workhorse of R
 * list
 * factors
 
@@ -58,6 +58,9 @@ where:
 ## Let's create some data/objects
 
 ### Create 5 scalar values.
+<- means assign so a is assigned to 3
+can use (=) but not as common 
+assign 3 to the object a 
 
 ```{r}
 a <- 3
@@ -76,7 +79,7 @@ v1 <- c(a,b,c,d,e)
 v2 <- c(3,1,5,4.5,6.234)
 ```
 
-Let's make a couple more vectors with 5 elements. Let's make one with characters/letters and another one with TRUE/FALSE (or T/F) logical values and a third with only whole numbers.
+Let's make a couple more vectors with 5 elements. Let's make one with characters/letters and another one with TRUE/FALSE (or T/F) logical values and a third with only whole numbers. Spelling and case both matter! Character variables are in quotes.. even if they are actual numbers. 
 
 ```{r}
 v.char <- c("blue","green","red","yellow","blue")
@@ -122,7 +125,7 @@ typeof(v.int)
 
 ---
 
-**NOTE:** Notice that `v.int` is a numeric vector not an integer. We can force this to a true integer vector using `is.integer()` to test to see if `R` thinks is it is an integer vector. If not, then we can use `as.integer()` to force it.
+**NOTE:** Notice that `v.int` is a numeric vector not an integer. We can force this to a true integer vector using `is.integer()` to test to see if `R` thinks is it is an integer vector. If not, then we can use `as.integer()` to force it. Type of is the way it is stored in the computer. 
 
 ```{r}
 is.integer(v.int)
@@ -154,6 +157,22 @@ Most of these have associated `as.xx()` functions to help you move back and fort
 * `as.factor()`
 * and there are more - just look in help for the various `as.xxx()` functions.
 
+```{r}
+# create character vector
+v3 <- c("1","2","3","<.2")
+
+#let's force this to be numeric
+v4 <- as.numeric(v3)
+v4
+class(v4)
+
+#compare the 4th element of each vector
+v3[4]
+v4[4]
+```
+
+
+
 ### Make a `data.frame`
 
 Thus far, all of our vectors are of the same length, but they are of different type. The best data object to hold (a) vectors of the same length and (b) of different data types is a `data.frame`. The `data.frame` object is the best form of **TIDY** data where each ROW is a single CASE (or SUBJECT) and each COLUMN is a feature, measurement, or piece of information about that case (i.e. the COLUMNS are the VARIABLES).
@@ -169,7 +188,7 @@ Let's combine v2, v.char, v.int2, and v.log into a `data.frame`. The easiest way
 
 ```{r}
 # create a data.frame object called "df"
-# combining 4 vectors v2, v.char, v.int2, v.log
+# combining 4 vectors v2, v.char, v.int2, v.log and these are all assumed to be collums
 df <- data.frame(v2,v.char,v.int2,v.log)
 
 # look at the structure
@@ -216,7 +235,15 @@ names(df) <- c("avgvisit","color","year","valid")
 
 # see that the variable/column names have updated
 names(df)
+
+#naming conventions ave_visit, ave.visit, aveVisit, 
 ```
+***NOTE:** How to check session information which is supper important if you ever need to post a question
+```{r}
+sessionInfo()
+```
+
+
 
 ### View/Print the dataset (as a table)
 
@@ -240,6 +267,9 @@ The following dataset comes from the [UCI Data Repository](http://archive.ics.uc
 ```{r}
 # load the tidyverse package(s)
 library(tidyverse)
+
+#suppose I wanted to read in a SPSS file so I want the read_spss() function indside the have package. Load haven
+library(haven)
 
 # read in the comma delimited (CSV) formatted dataset
 # **NOTE**: This dataset does NOT have the column
