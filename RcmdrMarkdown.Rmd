@@ -1,0 +1,138 @@
+<!-- R Commander Markdown Template -->
+
+Homework #3
+=======================
+
+### Taylor Thul
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+Get the dataset into R.
+
+```{r}
+names(White_wines) <- make.names(names(White_wines))
+```
+
+```{r}
+library(abind, pos=18)
+```
+
+
+```{r}
+library(e1071, pos=19)
+```
+
+Run some summary statistics: 
+
+```{r}
+numSummary(White_wines[,c("alcohol", "chlorides", "citric.acid", "density", 
+  "fixed.acidity", "free.sulfur.dioxide", "pH", "quality", "residual.sugar", 
+  "sulphates", "total.sulfur.dioxide", "volatile.acidity")], 
+  statistics=c("mean", "sd", "IQR", "quantiles"), quantiles=c(0,.25,.5,.75,1))
+```
+Make sure no data is missing:
+
+```{r}
+sapply(White_wines, function(x)(sum(is.na(x)))) # NA counts
+```
+No missing data! Hooray!
+Look at the distribution of the variables:
+
+```{r}
+#appears normal
+with(White_wines, Hist(quality, scale="frequency", breaks="Sturges", 
+  col="darkgray"))
+```
+
+Scatterplot matric of alcohol, chlorides, citric acid and quality
+```{r}
+scatterplotMatrix(~alcohol+chlorides+citric.acid+quality, reg.line=FALSE, 
+  smooth=FALSE, spread=FALSE, span=0.5, ellipse=FALSE, levels=c(.5, .9), 
+  id.n=0, diagonal = 'density', data=White_wines)
+```
+
+Scatterplot of density, fixed acidity, free sulfur dioxide and pH
+
+```{r}
+scatterplotMatrix(~density+fixed.acidity+free.sulfur.dioxide+pH, 
+  reg.line=FALSE, smooth=FALSE, spread=FALSE, span=0.5, ellipse=FALSE, 
+  levels=c(.5, .9), id.n=0, diagonal = 'density', data=White_wines)
+```
+
+Scatterplot of residual sugar, sulphates, total sulfur dioxide and volatile acidity.  Residual sugar may need transformed. 
+
+```{r}
+scatterplotMatrix(~residual.sugar+sulphates+total.sulfur.dioxide+volatile.acidity,
+   reg.line=FALSE, smooth=FALSE, spread=FALSE, span=0.5, ellipse=FALSE, 
+  levels=c(.5, .9), id.n=0, diagonal = 'density', data=White_wines)
+```
+look at residual sugar on it's own
+
+```{r}
+with(White_wines, Hist(residual.sugar, scale="frequency", breaks="Sturges", 
+  col="darkgray"))
+```
+add new variable of log of sugar residuals
+```{r}
+White_wines$residual.sugar2 <- with(White_wines, log2(residual.sugar))
+```
+it doesn't really look more normal 
+
+```{r}
+with(White_wines, Hist(residual.sugar2, scale="frequency", breaks="Sturges",
+   col="darkgray"))
+```
+
+```{r}
+library(nortest, pos=20)
+```
+
+```{r}
+with(White_wines, shapiro.test(residual.sugar))
+```
+the Shapiro-Wilk is < 0.05 so we accept the hypothesis the data is not normally distibuted.
+so try the Shapiro- Wilk on the transformed data 
+
+```{r}
+with(White_wines, shapiro.test(residual.sugar2))
+```
+this did not help at all... still not normal.
+moving on to the regression model
+
+```{r}
+RegModel.1 <- 
+  lm(quality~alcohol+chlorides+citric.acid+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates+total.sulfur.dioxide+volatile.acidity,
+   data=White_wines)
+summary(RegModel.1)
+```
+
+whoops forgot to seperate into training and test data
+```{r}
+set.seed(20170214)
+White_wines$group <- runif(length(White_wines$parent), min = 0, max = 1)
+summary(White_wines)
+
+#then it splits the data using the group, have to have plenty of data to do this and the split is 90/10 
+
+#what random forests do is this process over and over again and makes the aggregate which might be called bootstrapping?
+
+Galton.train <- subset(Galton, group <= 0.90)
+Galton.test <- subset(Galton, group > 0.90)
+
+```
+
