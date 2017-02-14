@@ -114,25 +114,51 @@ with(White_wines, shapiro.test(residual.sugar2))
 this did not help at all... still not normal.
 moving on to the regression model
 
-```{r}
-RegModel.1 <- 
-  lm(quality~alcohol+chlorides+citric.acid+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates+total.sulfur.dioxide+volatile.acidity,
-   data=White_wines)
-summary(RegModel.1)
-```
 
-whoops forgot to seperate into training and test data
+....but I don't know what to do about that so moving on the the regression
 ```{r}
+# divide the dataset into a training and a testing set based on a random uniform number on fixed seed, which in this case we are using the date
+# this step is also creating a new variable and adding it to the data set which is a distribution of random numbers from 0 to 1 
+
 set.seed(20170214)
-White_wines$group <- runif(length(White_wines$parent), min = 0, max = 1)
+White_wines$group <- runif(length(White_wines$quality), min = 0, max = 1)
 summary(White_wines)
 
-#then it splits the data using the group, have to have plenty of data to do this and the split is 90/10 
 
 #what random forests do is this process over and over again and makes the aggregate which might be called bootstrapping?
 
-Galton.train <- subset(Galton, group <= 0.90)
-Galton.test <- subset(Galton, group > 0.90)
+White_wines.train <- subset(White_wines, group <= 0.90)
+White_wines.test <- subset(White_wines, group > 0.90)
 
+#see if it worked
+summary(White_wines.train)
+
+#I think it worked! 
 ```
+```
+
+moving on to do a regression:
+
+
+```{r}
+RegModel.1 <- 
+  lm(quality~alcohol+chlorides+citric.acid+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates+total.sulfur.dioxide+volatile.acidity,
+   data=White_wines.train)
+summary(RegModel.1)
+```
+So it looks like alcohol, chlorides, density, fixed acidity, pH, residual. sugar, sulphates, and volatile acidity are all singificanly assoicated with predicting quality.  
+Run the model again taking out the non-signficant variables:
+
+```{r}
+RegModel.2 <- 
+  lm(quality~alcohol+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates++volatile.acidity,
+   data=White_wines.train)
+summary(RegModel.2)
+```
+Check some plots to see how the model fits:
+```{r}
+layout(matrix(1:4,2,2))
+plot(RegModel.2)
+```
+
 
